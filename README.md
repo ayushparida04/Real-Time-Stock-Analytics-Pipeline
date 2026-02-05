@@ -54,3 +54,14 @@ It simulates the flow of high-frequency financial data through a "Medallion Arch
 3.  **Observe:** Watch the "System Logs" drawer to see data moving from Ingestion -> Processing -> Storage stages.
 4.  **Analyze:** Click "AI Insight" to generate a market report based on the live chart data.
 5.  **Learn:** Switch to the "Implementation" view to read the C# and Python code that defines the pipeline logic.
+
+---
+
+## 📝 Note on API Usage
+To enable the **AI Market Analyst** and interactive architecture explanations, a **Google Gemini API Key** is required. 
+
+1. Obtain a free key from [Google AI Studio](https://aistudio.google.com/).
+2. Create a `.env` file in the root directory.
+3. Add your key: `VITE_API_KEY=your_key_here`.
+
+*If no key is provided, the dashboard will still function, but AI-generated insights will be unavailable.*
