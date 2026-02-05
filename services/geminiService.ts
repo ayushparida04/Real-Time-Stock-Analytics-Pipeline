@@ -5,7 +5,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 export const getMarketAnalysis = async (data: StockDataPoint[], symbol: string): Promise<string> => {
   try {
-    const recentData = data.slice(-10); // Analyze last 10 points
+    const recentData = data.slice(-10); 
     const prompt = `
       Act as a senior financial analyst. Analyze the following recent stock market data points (simulated) for ${symbol}.
       
