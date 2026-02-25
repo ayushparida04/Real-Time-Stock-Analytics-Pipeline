@@ -1,67 +1,62 @@
-# Azure Stream Analytics Showcase
+# 📈 Real-Time Stock Analytics Pipeline
+### *Full-Scale Medallion Architecture Implementation*
 
-## 🚀 Overview
-This application serves as a comprehensive interactive dashboard demonstrating a **Real-Time Stock Analysis Pipeline**. It bridges the gap between backend Data Engineering and frontend visualization, simulating a modern architecture using **Azure Cloud Services**, **Databricks**, and **React**.
-
-It simulates the flow of high-frequency financial data through a "Medallion Architecture" (Bronze/Silver/Gold layers) and provides AI-powered insights into market trends.
-
-## ⚡ Features
-
-### 1. Real-Time Data Simulation
-- Simulates a high-throughput **C# Producer** pushing stock ticks to **Azure Event Hubs**.
-- Generates realistic price movements, volatility, and volume for multiple assets (AAPL, MSFT, BTC, etc.).
-- Visualizes the data stream latency and processing stages in a live log drawer.
-
-### 2. Medallion Architecture Visualization
-- **Ingestion (Bronze):** Raw data capture via Event Hubs.
-- **Processing (Silver):** Streaming aggregations (5-minute windows) using **PySpark/Databricks**.
-- **Storage (Gold):** Refined, business-level data stored in **Delta Lake**.
-- **Interactive Diagram:** Clickable architecture nodes powered by **Gemini AI** to explain technical concepts on demand.
-
-### 3. Live Dashboard
-- **Dynamic Charts:** Real-time updating Area and Line charts using `recharts`.
-- **Technical Indicators:** Live calculation of RSI (Relative Strength Index) and Moving Averages.
-- **Multi-Asset Support:** Toggle between different stocks/crypto with unique volatility profiles and price points.
-
-### 4. AI Market Analyst
-- Integrated **Google Gemini 3 Flash** model.
-- Acts as a "Senior Financial Analyst" to parse the simulated data window.
-- Provides concise, context-aware summaries of current trends, volatility, and RSI indicators in natural language.
-
-### 5. Engineering Implementation View
-- Dedicated section for "Infrastructure as Code".
-- Displays the actual **C# Event Hub Producer** logic and **PySpark Structured Streaming** jobs that theoretically power the backend.
-- Syntax highlighting and copy functionality for code snippets.
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Framework:** React 19 (TypeScript)
-- **Styling:** Tailwind CSS
-- **Visualization:** Recharts
-- **Icons:** Lucide React
-- **Build Tool:** Vite / ESBuild
-
-### Simulated Backend Architecture
-- **Ingestion:** Azure Event Hubs
-- **Processing:** Azure Databricks (Spark Structured Streaming)
-- **Storage:** Azure Data Lake Storage Gen2 (Delta Format)
-- **AI:** Google GenAI SDK (`@google/genai`)
-
-## 🎯 How It Works
-1.  **Selection:** Choose a stock (e.g., AAPL) from the dropdown in the dashboard header.
-2.  **Stream:** Click "Start Stream" to begin the data simulation.
-3.  **Observe:** Watch the "System Logs" drawer to see data moving from Ingestion -> Processing -> Storage stages.
-4.  **Analyze:** Click "AI Insight" to generate a market report based on the live chart data.
-5.  **Learn:** Switch to the "Implementation" view to read the C# and Python code that defines the pipeline logic.
+This project is a high-performance **End-to-End Data Engineering** showcase. It bridges the gap between high-throughput backend ingestion and real-time frontend visualization, utilizing a production-grade stack of **Azure**, **Databricks**, **.NET 8**, and **React**.
 
 ---
 
-## 📝 Note on API Usage
-To enable the **AI Market Analyst** and interactive architecture explanations, a **Google Gemini API Key** is required. 
+## 🚀 System Architecture
+Built on the industry-standard **Medallion Architecture**, this pipeline manages the complete lifecycle of financial data:
 
-1. Obtain a free key from [Google AI Studio](https://aistudio.google.com/).
-2. Create a `.env` file in the root directory.
-3. Add your key: `VITE_API_KEY=your_key_here`.
+* **Ingestion (Bronze Layer):** A high-throughput **C# / .NET 8** Producer ingests live market data from **Alpha Vantage APIs** and streams it into **Azure Event Hubs** at 1,000+ msgs/sec.
+* **Processing (Silver Layer):** **Spark Structured Streaming (PySpark)** on **Databricks** executes complex sliding-window aggregations (5min window / 1min slide) to compute real-time **RSI** and **Volatility** metrics.
+* **Storage (Gold Layer):** Refined, business-ready data is persisted into **ACID-compliant Delta Lake** tables, ensuring total data integrity for historical analysis and downstream consumption.
 
-*If no key is provided, the dashboard will still function, but AI-generated insights will be unavailable.*
+---
+
+## ⚡ Key Features
+
+### 1. High-Frequency Ingestion Engine
+* **Rx.NET Integration:** Leverages **Reactive Extensions** in C# to buffer and manage massive data spikes without latency or backpressure.
+* **Resilient Design:** Features automated synthetic fallback generation to ensure the dashboard remains live even during API rate-limiting or outages.
+
+### 2. Live Engineering Dashboard
+* **Sub-Second Visuals:** Dynamic Area and Line charts built with `recharts` that update in real-time to provide immediate market insights.
+* **Interactive Architecture:** A clickable system diagram powered by **Gemini AI** that explains technical cloud components on-demand.
+
+### 3. AI Market Analyst
+* **LLM Integration:** Built-in **Google Gemini 3 Flash** acts as a virtual "Senior Financial Analyst".
+* **Context-Aware Insights:** Automatically parses live price action, RSI trends, and volatility to generate natural language market reports.
+
+---
+
+## 🛠️ Tech Stack
+
+### **Data Engineering (The "Guts")**
+* **Languages:** C# (.NET 8), Python (PySpark), SQL (Delta Lake).
+* **Streaming & Cloud:** Azure Event Hubs, Azure Data Lake Storage Gen2.
+* **Compute:** Azure Databricks (Spark Structured Streaming).
+
+### **Frontend & AI**
+* **UI Framework:** React 19, TypeScript, Tailwind CSS.
+* **AI Engine:** Google GenAI SDK (`@google/genai`).
+
+---
+
+## 🎯 How It Works
+1.  **Select & Stream:** Choose an asset (AAPL, MSFT, BTC) and hit "Start Stream" to activate the pipeline.
+2.  **Monitor Processing:** Open the **System Logs** drawer to see raw data transition through Bronze, Silver, and Gold stages in real-time.
+3.  **Audit the Implementation:** Switch to the **"Implementation View"** to inspect the production C# and PySpark logic powering the backend.
+
+---
+
+## 📝 Setup & API Usage
+To enable the **AI Market Analyst** and interactive explanations, a Google Gemini API Key is required:
+
+1.  Obtain a free key from [Google AI Studio](https://aistudio.google.com/).
+2.  Create a `.env` file in the root directory.
+3.  Add your key: `VITE_API_KEY=your_key_here`.
+
+---
+
+*Note: The dashboard functions as a standalone demo, but backend features require the Gemini API for full interactivity.*
