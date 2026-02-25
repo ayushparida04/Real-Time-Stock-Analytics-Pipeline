@@ -1,76 +1,57 @@
 import React, { useState } from 'react';
-import { Code, Terminal, FileJson, Copy, Check } from 'lucide-react';
+import { Terminal, Copy, Check } from 'lucide-react';
 import { CodeSnippet } from '../types';
 
 const SNIPPETS: CodeSnippet[] = [
   {
-    title: 'C# Event Hub Producer',
+    title: '.NET 8 Real-Time Stock Producer',
     language: 'csharp',
-    description: 'Simulates the high-throughput ingestion of stock tick data into Azure Event Hubs.',
-    code: `using Azure.Messaging.EventHubs;
-using Azure.Messaging.EventHubs.Producer;
-using System.Text.Json;
+    description: 'HttpClient + Rx.NET streaming with synthetic fallback to maintain 100+ msg/sec into Azure Event Hubs.',
+    code: `var tickStream = Observable.Interval(TimeSpan.FromMilliseconds(1000d / settings.TargetMessagesPerSecond), TaskPoolScheduler.Default)
+    .SelectMany(_ => Observable.FromAsync(ct => FetchStockTickAsync(settings, httpClient, logger, ct)))
+    .Where(tick => tick is not null)
+    .Select(tick => tick!)
+    .Publish()
+    .RefCount();
 
-public async Task SendStockTicksAsync(StockTick tick)
+tickStream
+    .Buffer(TimeSpan.FromMilliseconds(100), 50)
+    .Where(batch => batch.Count > 0)
+    .SelectMany(batch => Observable.FromAsync(ct => SendBatchAsync(eventHubProducer, batch, logger, ct)))
+    .Subscribe();
+
+public sealed class StockTick
 {
-    // Initialize the connection string from Key Vault
-    string connectionString = _configuration["EventHubConnection"];
-    string eventHubName = "stock-ticks-bronze";
-
-    await using (var producerClient = new EventHubProducerClient(connectionString, eventHubName))
-    {
-        // Create a batch of events 
-        using EventDataBatch eventBatch = await producerClient.CreateBatchAsync();
-
-        // Serialize the tick data to JSON
-        var tickData = JsonSerializer.Serialize(tick);
-        
-        if (!eventBatch.TryAdd(new EventData(Encoding.UTF8.GetBytes(tickData))))
-        {
-            throw new Exception("Event is too large for the batch and cannot be sent.");
-        }
-
-        // Send the batch to the event hub
-        await producerClient.SendAsync(eventBatch);
-        Console.WriteLine($"Sent tick for {tick.Symbol} at {tick.Timestamp}");
-    }
+    public required string Symbol { get; init; }
+    public required decimal Price { get; init; }
+    public required long Volume { get; init; }
+    public required DateTimeOffset Timestamp { get; init; }
 }`
   },
   {
-    title: 'PySpark Streaming (Silver Layer)',
+    title: 'Databricks Silver Layer (PySpark)',
     language: 'python',
-    description: 'Databricks job reading from Event Hubs, performing windowed aggregations.',
-    code: `from pyspark.sql.functions import *
-from pyspark.sql.types import *
+    description: 'Structured Streaming sliding window metrics (RSI + volatility) with watermarking and Delta append writes.',
+    code: `parsed_ticks = raw_stream
+    .select(from_json(col("body").cast("string"), stock_schema).alias("tick"))
+    .select("tick.*")
+    .withWatermark("timestamp", "10 minutes")
 
-# Define schema for incoming JSON
-schema = StructType([
-    StructField("symbol", StringType()),
-    StructField("price", DoubleType()),
-    StructField("timestamp", TimestampType())
-])
+windowed_stats = parsed_ticks.groupBy(
+    window(col("timestamp"), "5 minutes", "1 minute"),
+    col("symbol")
+).agg(
+    avg("price").alias("avg_price"),
+    stddev_samp("price").alias("volatility_stddev"),
+    first("price").alias("first_price"),
+    last("price").alias("last_price")
+)
 
-# Read Stream from Event Hubs
-df_raw = spark.readStream.format("eventhubs").options(**ehConf).load()
-
-# Parse JSON payload
-df_parsed = df_raw.withColumn("body", from_json(col("body").cast("string"), schema)) \
-                  .select("body.*")
-
-# Calculate 5-minute Moving Average using Sliding Window
-df_windowed = df_parsed \
-    .groupBy(
-        window(col("timestamp"), "5 minutes", "1 minute"),
-        col("symbol")
-    ) \
-    .agg(avg("price").alias("moving_avg_5m"))
-
-# Write Stream to Delta Lake (Silver Table)
-query = df_windowed.writeStream \
+silver_with_indicators.writeStream \
     .format("delta") \
     .outputMode("append") \
-    .option("checkpointLocation", "/mnt/delta/silver/_checkpoints") \
-    .table("stock_silver_aggregates")`
+    .option("checkpointLocation", "dbfs:/pipelines/stock/silver/_checkpoints/stock_indicators") \
+    .table("silver.stock_tick_indicators")`
   }
 ];
 
@@ -103,15 +84,15 @@ const CodeShowcase: React.FC = () => {
             ))}
         </div>
       </div>
-      
+
       <div className="flex-1 p-4 overflow-hidden flex flex-col">
         <div className="mb-4">
             <h4 className="text-lg font-bold text-white mb-1">{SNIPPETS[activeTab].title}</h4>
             <p className="text-sm text-gray-400">{SNIPPETS[activeTab].description}</p>
         </div>
-        
+
         <div className="relative flex-1 bg-gray-950 rounded-lg border border-gray-800 overflow-hidden group">
-             <button 
+             <button
                 onClick={handleCopy}
                 className="absolute top-2 right-2 p-2 bg-gray-800 rounded-md text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity z-10"
              >
